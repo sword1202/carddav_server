@@ -33,7 +33,7 @@ class Standard extends \Baikal\Model\Config {
     # Default values
     protected $aData = [
         "configured_version"    => BAIKAL_VERSION,
-        "timezone"              => "Europe/Paris",
+        "timezone"              => "America/Denver",
         "card_enabled"          => true,
         "cal_enabled"           => true,
         "dav_auth_type"         => "Digest",
@@ -46,7 +46,8 @@ class Standard extends \Baikal\Model\Config {
     ];
 
     function __construct() {
-        $this->aData["invite_from"] = "noreply@" . $_SERVER['SERVER_NAME']; // Default value
+        // $this->aData["invite_from"] = "noreply@" . $_SERVER['SERVER_NAME']; // Default value
+        $this->aData["invite_from"] = "mark@ultramls.com";
         parent::__construct("system");
     }
 

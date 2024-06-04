@@ -1,9 +1,9 @@
 system:
     configured_version: '0.7.0'
-    timezone: 'Europe/Paris'
+    timezone: 'America/Denver'
     card_enabled: true
     cal_enabled: true
-    invite_from: 'noreply@localhost'
+    invite_from: 'mark@ultramls.com'
     dav_auth_type: 'Digest'
     admin_passwordhash: 5fe794627e1f841f8debba065e2c807a
     failed_access_message: 'user %u authentication failure for Baikal'
