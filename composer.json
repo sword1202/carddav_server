@@ -1,0 +1,48 @@
+{
+    "name": "sabre/baikal",
+    "type": "project",
+    "description": "Baïkal is a lightweight CalDAV + CardDAV server based on PHP, SQLite or MySQL, and SabreDAV",
+    "keywords": ["Project", "Server", "Calendar", "Contact", "WebDAV", "CalDAV", "CardDAV", "iCalendar", "lightweight"],
+    "homepage": "https://sabre.io/baikal/",
+    "license" : "GPL-3.0-only",
+    "require": {
+        "php"           : "^7.2 || ^8.0",
+        "sabre/dav"     : "~4.6.0",
+        "twig/twig"     : "~3.8.0",
+        "symfony/yaml"  : "^5.4",
+        "psr/log"       : "^1",
+        "ext-dom"       : "*",
+        "ext-openssl"   : "*",
+        "ext-pdo"       : "*",
+        "ext-zlib"      : "*"
+    },
+    "require-dev" : {
+        "friendsofphp/php-cs-fixer": "3.52.1",
+        "phpstan/phpstan": "^1.10"
+    },
+    "replace" : {
+        "jeromeschneider/baikal" : "self.version"
+    },
+    "autoload": {
+        "psr-0" : {
+            "Baikal"         : "Core/Frameworks/",
+            "Flake"          : "Core/Frameworks/",
+            "Formal"         : "Core/Frameworks/"
+        }
+    },
+    "support" : {
+        "source" : "https://github.com/sabre-io/Baikal"
+    },
+    "scripts": {
+        "cs-fixer": [
+            "php-cs-fixer fix"
+        ],
+        "phpstan": [
+            "phpstan analyse Core html"
+        ],
+        "test": [
+            "composer cs-fixer",
+            "composer phpstan"
+        ]
+    }
+}
