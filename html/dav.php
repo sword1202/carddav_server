@@ -25,6 +25,7 @@
 ***************************************************************/
 
 use Symfony\Component\Yaml\Yaml;
+use Sabre\VObject;
 
 ini_set("session.cookie_httponly", 1);
 ini_set("display_errors", 0);
@@ -66,4 +67,13 @@ $server = new \Baikal\Core\Server(
     $GLOBALS['DB']->getPDO(),
     PROJECT_BASEURI . 'dav.php/'
 );
+
+// $vcard = new VObject\Component\VCard([
+//     'FN'  => 'Cowboy Henk',
+//     'TEL' => '+1 555 34567 455',
+//     'N'   => ['Henk', 'Cowboy', '', 'Dr.', 'MD'],
+// ]);
+
+// echo $vcard->serialize();
+
 $server->start();

@@ -58,7 +58,6 @@ class Auth {
         $sPassHash = self::hashAdminPassword($sPass, $config['system']['auth_realm']);
         if ($sUser === "admin" && $sPassHash === $config['system']['admin_passwordhash']) {
             $_SESSION["baikaladminauth"] = md5($config['system']['admin_passwordhash']);
-
             return true;
         }
 
@@ -70,6 +69,7 @@ class Auth {
     }
 
     static function hashAdminPassword($sPassword, $sAuthRealm) {
+        
         return hash('sha256', 'admin:' . $sAuthRealm . ':' . $sPassword);
     }
 }

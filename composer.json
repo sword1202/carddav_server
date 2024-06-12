@@ -1,7 +1,7 @@
 {
     "name": "sabre/baikal",
     "type": "project",
-    "description": "Baïkal is a lightweight CalDAV + CardDAV server based on PHP, SQLite or MySQL, and SabreDAV",
+    "description": "CardUp Contact Tool is a lightweight CalDAV + CardDAV server based on PHP, SQLite or MySQL, and SabreDAV",
     "keywords": ["Project", "Server", "Calendar", "Contact", "WebDAV", "CalDAV", "CardDAV", "iCalendar", "lightweight"],
     "homepage": "https://sabre.io/baikal/",
     "license" : "GPL-3.0-only",
@@ -14,7 +14,16 @@
         "ext-dom"       : "*",
         "ext-openssl"   : "*",
         "ext-pdo"       : "*",
-        "ext-zlib"      : "*"
+        "ext-zlib"      : "*",
+        "mailgun/mailgun-php": "^4.2",
+        "symfony/http-client": "^7.1",
+        "nyholm/psr7": "^1.8",
+        "phpmailer/phpmailer": "^6.9",
+        "google/cloud-firestore": "^1.37.0",
+        "grpc/grpc": "1.38",
+        "google/apiclient": "^2.16",
+        "google/protobuf": "^3.25",
+        "google/gax": "^1.19.1"
     },
     "require-dev" : {
         "friendsofphp/php-cs-fixer": "3.52.1",
@@ -44,5 +53,10 @@
             "composer cs-fixer",
             "composer phpstan"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }

@@ -104,7 +104,7 @@ class Server {
         $this->authType = $authType;
         $this->authRealm = $authRealm;
         $this->pdo = $pdo;
-        $this->baseUri = $baseUri;
+        $this->baseUri = $baseUri;       
 
         $this->initServer();
     }

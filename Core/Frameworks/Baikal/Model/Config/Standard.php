@@ -113,7 +113,7 @@ class Standard extends \Baikal\Model\Config {
     }
 
     function label() {
-        return "Baïkal Settings";
+        return "Settings";
     }
 
     function set($sProp, $sValue) {

@@ -54,7 +54,7 @@ require PROJECT_PATH_ROOT . 'vendor/autoload.php';
 # Create and setup a page object
 $oPage = new \Flake\Controller\Page(PROJECT_PATH_ROOT . "Core/Resources/Web/Baikal/Templates/Page/index.html");
 $oPage->injectHTTPHeaders();
-$oPage->setTitle("Baïkal server");
+$oPage->setTitle("Cardup Contacts Tool");
 $oPage->setBaseUrl(PROJECT_URI);
 
 # Draw page
