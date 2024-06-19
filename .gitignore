@@ -5,6 +5,7 @@ logs
 config/baikal.yaml
 config/.htaccess
 Specific/INSTALL_DISABLED
+html/service_account_key.json
 
 # Composer stuff
 composer.lock
