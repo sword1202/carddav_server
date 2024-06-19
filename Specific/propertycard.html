@@ -6,17 +6,30 @@
                     <tbody>
                         <tr>
                             <td align="left" style="padding: 10px 0 0 0;">
-                                <table cellpadding="0" cellspacing="0">
-                                    <tbody>
-                                        <tr>
-                                            
-                                            <td align="left" valign="middle" style=" font-size: 18px; line-height: 40px; font-weight: 400; color: #2b2b2b;">
-                                                <a style="text-decoration: none; color: #000000;" target="_blank">
-                                                    Newly Listed on {{DATE}}
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                                <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#ffffff" style="margin:0 auto" align="center">
+                                    
+                                    <tbody><tr>
+                                        <td>
+                                            <table>
+                                                <tbody><tr>
+                                                    <td style="margin:0;font-size:18px;font-family:Outfit,Helvetica,Arial,sans-serif;color:#000000;font-weight:500">
+                                                        {{TITLE}}
+                                                    </td>
+                                                    
+                                                    <td style="padding-left:10px;margin:0;font-size:18px;font-family:Outfit,Helvetica,Arial,sans-serif;color:#4c4c4c;text-decoration:line-through">
+                                                        {{ORIGIN_PRICE}}
+                                                    </td>
+                                                    
+                                                </tr>
+                                            </tbody></table>
+                                        </td>
+                                        
+                                        <td align="right" style="font-size:18px;font-family:Outfit,Helvetica,Arial,sans-serif;color:#4c4c4c">
+                                             {{CHANGED_PRICE}}
+                                        </td>
+                                        
+                                    </tr>
+                                </tbody>
                                 </table>
                             </td>
                         </tr>

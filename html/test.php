@@ -67,6 +67,7 @@
             $searchParams = [];
             parse_str(substr($searchQuery, 1), $searchParams); // Remove '?' from the beginning
             $data['searchParams'] = $searchParams;
+            $data['document_id'] = $document->id();
             $results[] = $data;
         }
     
@@ -74,27 +75,25 @@
         
         $apiKey = "23c8729a55e9986ae45ca71d18a3742c";
         $dataset = "mlspin";
-        $limit = 50;
-        $orderby = '$orderby='.urlencode('OriginalEntryTimestamp desc');
+        $limit = 1;
+        $orderby = '$orderby='.urlencode('StatusChangeTimestamp desc');
         $apiURL = "https://api.bridgedataoutput.com/api/v2/odata/$dataset/Property?access_token=$apiKey";
     
         // Set timezone to UTC... OriginalEntryTimestamp setup for UTC-3 zone.
         date_default_timezone_set('UTC');
     
-        $hoursAgo = 24;
+        $hoursAgo = 12;
         $date = date('Y-m-dTH:i:s', strtotime('-'.($hoursAgo+1).' hour'));
-
+        print_r($results);
         foreach ($results as $result) {
 
             $email = $result['user_data']['email'];
-            // if (str_contains($email, 'hmzamalik47')) {
-                    
-            //     continue;
-            // }
+            if (str_contains($email, 'hmzamalik47') || str_contains($email, 'mark')) {
+                continue;
+            }
 
             // Constructing the bridgeQuery
             $bridgeQuery = "tolower(PropertyType) eq '" . strtolower($result['searchParams']['listingStatus']) . "' and tolower(StandardStatus) eq '" . strtolower($result['searchParams']['activeStatus']) . "' and contains(tolower(UnparsedAddress), tolower('" . strtolower($result['searchParams']['address']) . "'))";
-            
             if ($result['searchParams']['minPriceRange'] > 0) {
                 $bridgeQuery .= " and ListPrice ge " . $result['searchParams']['minPriceRange'];
             }
@@ -136,9 +135,10 @@
                 $listingCount = 0;
                 $propertyCardsHtml = "";
                 foreach ($properties->value as $property) {
-                    $originalEntryTimestamp = $property->OriginalEntryTimestamp;
+                    $originalEntryTimestamp = $property->StatusChangeTimestamp;
                     
                     if (!isValidPeriod($date, $originalEntryTimestamp)) {
+                        
                         break;
                     }
 
@@ -150,11 +150,14 @@
                     $BedroomsTotal = $property->BedroomsTotal;
                     $BathroomsFull = $property->BathroomsFull;
                     $MlsStatus = $property->MlsStatus;
+                    if ($MlsStatus == 'Price Changed') {
+                        continue;
+                    }
                     $LivingArea = $property->LivingArea;
+
                     if ($property->Media == null) {
                         continue;
                     }
-
                     $countMedia = count($property->Media);
                     $photo = $property->Media[0]->MediaURL;
                     $photo1 = $property->Media[1]->MediaURL;
@@ -174,17 +177,18 @@
                     }else if($property->PropertyType == "Residential Lease"){
                         $PropertyType = "For Rent";
                     }
+                    
                     $replacedAddress = urlencode(str_replace(" ", "-", $address) . "__".$property->ListingKey);
                     $propertyCardLink = "https://teamrealtor.org/property/$replacedAddress";
                     
                     // set Title
-                    $title = 'Newly Listed on '.date('M d', strtotime($originalEntryTimestamp));
+                    $title = 'Updated to "'.$MlsStatus.'"';
+                    
                     $changedPrice = '$'.shortNumber($originalListPrice - $ListPrice);
-
                     $replacements = [
                         '{{TITLE}}' => $title,
-                        '{{ORIGIN_PRICE}}' => ($originalListPrice == $ListPrice) ? '' : number_format($originalListPrice),
-                        '{{CHANGED_PRICE}}' => ($originalListPrice == $ListPrice) ? '' : $changedPrice,
+                        '{{ORIGIN_PRICE}}' => '',
+                        '{{CHANGED_PRICE}}' => '',
                         '{{imageUrl}}' => $photo,
                         '{{imageUrl1}}' => $photo1,
                         '{{imageUrl2}}' => $photo2,
@@ -211,12 +215,14 @@
                 
                 if (!empty($propertyCardsHtml)) {
                     // Prepare data for the full template
-                    $mSubject = 'A New Listing to '.$listingCount.' Properties in Your Saved Search for';
+                    $mSubject = 'Updates to '.$listingCount.' '.(($listingCount > 1)? 'Properties':'Property').' in Your Saved Search for';
+                     
                     $fullTemplateReplacements = [
                         '{{searchedIn}}' => $result['searchParams']['address'],
                         '{{SUBJECT}}'      => $mSubject,
                         '{{propertyCards}}' => $propertyCardsHtml,
                         '{{SEEALLLINK}}' => $result['search_data'],
+                        // '{{FIRSTORE_DOC_ID}}' => $result['document_id'],
                     ];
     
                     // Replace placeholders in the full email template
@@ -230,8 +236,7 @@
                     } else if ($result['searchParams']['listingStatus'] == 'Residential Lease') {
                         $statusR = 'For Rent';
                     }
-
-                    sendDailyAlert($email, 'A New Listing for '.$result['searchParams']['address'].' ('.$statusR.')', $fullTemplate);
+                    sendDailyAlert($email, 'Status Updated for '.$result['searchParams']['address'].' ('.$statusR.')', $fullTemplate);
                     
                 }
 

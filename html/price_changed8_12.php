@@ -74,21 +74,20 @@
         
         $apiKey = "23c8729a55e9986ae45ca71d18a3742c";
         $dataset = "mlspin";
-        $limit = 50;
-        $orderby = '$orderby='.urlencode('OriginalEntryTimestamp desc');
+        $limit = 10;
+        $orderby = '$orderby='.urlencode('StatusChangeTimestamp desc');
         $apiURL = "https://api.bridgedataoutput.com/api/v2/odata/$dataset/Property?access_token=$apiKey";
     
         // Set timezone to UTC... OriginalEntryTimestamp setup for UTC-3 zone.
         date_default_timezone_set('UTC');
     
-        $hoursAgo = 24;
+        $hoursAgo = 12;
         $date = date('Y-m-dTH:i:s', strtotime('-'.($hoursAgo+1).' hour'));
 
         foreach ($results as $result) {
 
             $email = $result['user_data']['email'];
             // if (str_contains($email, 'hmzamalik47')) {
-                    
             //     continue;
             // }
 
@@ -136,9 +135,10 @@
                 $listingCount = 0;
                 $propertyCardsHtml = "";
                 foreach ($properties->value as $property) {
-                    $originalEntryTimestamp = $property->OriginalEntryTimestamp;
+                    $originalEntryTimestamp = $property->StatusChangeTimestamp;
                     
                     if (!isValidPeriod($date, $originalEntryTimestamp)) {
+                        
                         break;
                     }
 
@@ -150,6 +150,12 @@
                     $BedroomsTotal = $property->BedroomsTotal;
                     $BathroomsFull = $property->BathroomsFull;
                     $MlsStatus = $property->MlsStatus;
+                    // if ($MlsStatus != 'Price Changed') {
+                    //     continue;
+                    // }
+                    if ($originalListPrice == $ListPrice) {
+                        continue;
+                    }
                     $LivingArea = $property->LivingArea;
                     if ($property->Media == null) {
                         continue;
@@ -174,17 +180,18 @@
                     }else if($property->PropertyType == "Residential Lease"){
                         $PropertyType = "For Rent";
                     }
+                    
                     $replacedAddress = urlencode(str_replace(" ", "-", $address) . "__".$property->ListingKey);
                     $propertyCardLink = "https://teamrealtor.org/property/$replacedAddress";
                     
                     // set Title
-                    $title = 'Newly Listed on '.date('M d', strtotime($originalEntryTimestamp));
+                    $title = 'Updated Price $'.number_format($ListPrice);
+                    
                     $changedPrice = '$'.shortNumber($originalListPrice - $ListPrice);
-
                     $replacements = [
                         '{{TITLE}}' => $title,
                         '{{ORIGIN_PRICE}}' => ($originalListPrice == $ListPrice) ? '' : number_format($originalListPrice),
-                        '{{CHANGED_PRICE}}' => ($originalListPrice == $ListPrice) ? '' : $changedPrice,
+                        '{{CHANGED_PRICE}}' => ($originalListPrice == $ListPrice) ? '' : '↓'.$changedPrice,
                         '{{imageUrl}}' => $photo,
                         '{{imageUrl1}}' => $photo1,
                         '{{imageUrl2}}' => $photo2,
@@ -211,7 +218,8 @@
                 
                 if (!empty($propertyCardsHtml)) {
                     // Prepare data for the full template
-                    $mSubject = 'A New Listing to '.$listingCount.' Properties in Your Saved Search for';
+                    $mSubject = 'Price Changed to '.$listingCount.' '.(($listingCount > 1)? 'Properties':'Property').' in Your Saved Search for';
+                     
                     $fullTemplateReplacements = [
                         '{{searchedIn}}' => $result['searchParams']['address'],
                         '{{SUBJECT}}'      => $mSubject,
@@ -230,8 +238,7 @@
                     } else if ($result['searchParams']['listingStatus'] == 'Residential Lease') {
                         $statusR = 'For Rent';
                     }
-
-                    sendDailyAlert($email, 'A New Listing for '.$result['searchParams']['address'].' ('.$statusR.')', $fullTemplate);
+                    sendDailyAlert($email, 'Price Updated for '.$result['searchParams']['address'].' ('.$statusR.')', $fullTemplate);
                     
                 }
 

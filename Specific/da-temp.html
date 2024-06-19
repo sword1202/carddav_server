@@ -3,9 +3,10 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
+        <title>TeamRealtor</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="styles.css">
         <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     </head>
 
@@ -47,7 +48,7 @@
                                 <tbody>
                                     <tr>
                                         <td align="center" valign="top" style=" font-size: 22px; line-height: 32px; font-weight: 600; font-style: normal; letter-spacing: normal; color: #000000;">
-                                            Updates to {{count}} Properties in Your Saved Search for
+                                            {{SUBJECT}}
                                         </td>
                                     </tr>
                                     <tr>
@@ -119,7 +120,7 @@
                                             <span style="font-family: Arial, sans-serif; font-size: 15px; color:#757575;text-decoration:underline;display:inline-block">Privacy</span></a>&nbsp;&nbsp;|&nbsp;&nbsp;
                                             <a href="https://teamrealtor.org/unsbscribe" target="_blank" >
                                             <span style="font-family: Arial, sans-serif; font-size: 15px; color:#757575;text-decoration:underline;display:inline-block">Unsubscribe</span></a></td></tr>
-                                    
+                                            
                                 </tbody>
                             </table>
                         </td>
@@ -127,5 +128,27 @@
                 </tbody>
             </table>
         </div>
+        <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+        <script type='text/javascript'>
+           
+            $('.privacy').click(function () {
+                window.location='https://www.termsfeed.com/live/45c7db71-bc46-4d7f-853f-838654eb852c';
+            });
+
+            $('.unsubscribe').click(function () {
+                var doc_id = document.getElementById('firestore_doc_id').getAttribute('value');
+                console.log(doc_id);
+                // firebase.firestore()
+                // .collection("team_realtor_saved_searches")
+                // .doc(thisDoc)
+                // .delete()
+                // .then(() => console.log("Document deleted")) // Document deleted
+                // .catch((error) => console.error("Error deleting document", error));
+            });
+
+            
+        </script>       
+
     </body>
+
 </html>

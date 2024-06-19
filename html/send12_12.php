@@ -54,9 +54,9 @@
             $data = [];
             
             $data = $retriveddata;
-            // Fetch additional user data from team_realtor_users collection based on uid
+            // Fetch additional user data from users collection based on uid
             $uid = $retriveddata['uid'];
-            $userDoc = $firestore->collection('team_realtor_users')->document($uid)->snapshot();
+            $userDoc = $firestore->collection('users')->document($uid)->snapshot();
             $userData = $userDoc->data(); // Retrieve user data
             
             // Merge user data with saved search data
@@ -74,10 +74,24 @@
         
         $apiKey = "23c8729a55e9986ae45ca71d18a3742c";
         $dataset = "mlspin";
+        $limit = 50;
         $orderby = '$orderby='.urlencode('OriginalEntryTimestamp desc');
         $apiURL = "https://api.bridgedataoutput.com/api/v2/odata/$dataset/Property?access_token=$apiKey";
     
+        // Set timezone to UTC... OriginalEntryTimestamp setup for UTC-3 zone.
+        date_default_timezone_set('UTC');
+    
+        $hoursAgo = 12;
+        $date = date('Y-m-dTH:i:s', strtotime('-'.($hoursAgo+1).' hour'));
+
         foreach ($results as $result) {
+
+            $email = $result['user_data']['email'];
+            // if (str_contains($email, 'hmzamalik47')) {
+                    
+            //     continue;
+            // }
+
             // Constructing the bridgeQuery
             $bridgeQuery = "tolower(PropertyType) eq '" . strtolower($result['searchParams']['listingStatus']) . "' and tolower(StandardStatus) eq '" . strtolower($result['searchParams']['activeStatus']) . "' and contains(tolower(UnparsedAddress), tolower('" . strtolower($result['searchParams']['address']) . "'))";
             
@@ -94,19 +108,14 @@
                 $bridgeQuery .= " and BathroomsFull ge " . $result['searchParams']['bathroms'];
             }
     
-            // Set timezone to UTC... OriginalEntryTimestamp setup for UTC-3 zone.
-            date_default_timezone_set('UTC');
-    
-            $dailyAlertRepeat = 2; // daily alert count per a day
-            $repeatHours = 24/$dailyAlertRepeat;
-            // $date = date('Y-m-dTH:i:s', strtotime('-'.$repeatHours.' hour'));
-            $date = date('Y-m-dTH:i:s', strtotime('-12 hour'));
             // URL encode the query part
             $encodedFilter = urlencode($bridgeQuery);
-            $fullApiUrl = $apiURL . '&$filter=' . $encodedFilter . '&' . $orderby;
+            $fullApiUrl = $apiURL . '&$filter=' . $encodedFilter . '&$top='.$limit.'&' . $orderby;
             // print($fullApiUrl);
             // Initialize cURL
             $ch = curl_init();
+            print_r($fullApiUrl);
+            echo "\xA";
             curl_setopt($ch, CURLOPT_URL, $fullApiUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
@@ -132,27 +141,50 @@
                     if (!isValidPeriod($date, $originalEntryTimestamp)) {
                         break;
                     }
+
+                    // print_r($property);
                     
                     $address = $property->UnparsedAddress;
                     $ListPrice = $property->ListPrice;
+                    $originalListPrice = $property->OriginalListPrice;
                     $BedroomsTotal = $property->BedroomsTotal;
                     $BathroomsFull = $property->BathroomsFull;
                     $MlsStatus = $property->MlsStatus;
                     $LivingArea = $property->LivingArea;
+                    if ($property->Media == null) {
+                        continue;
+                    }
+
+                    $countMedia = count($property->Media);
                     $photo = $property->Media[0]->MediaURL;
                     $photo1 = $property->Media[1]->MediaURL;
                     $photo2 = $property->Media[2]->MediaURL;
-                    $photo3 = $property->Media[3]->MediaURL;
-                    $photo4 = $property->Media[4]->MediaURL;
+                    $photo3 = $property->Media[2]->MediaURL;
+                    $photo4 = $property->Media[2]->MediaURL;
+                    if ($countMedia >= 4) {
+                        $photo3 = $property->Media[3]->MediaURL;
+                        if ($countMedia >=5)
+                        {
+                            $photo4 = $property->Media[4]->MediaURL;
+                        }
+                    }
+
                     if($property->PropertyType == "Residential"){
                         $PropertyType = "For Sale";
-                    }else if($property->PropertyType){
+                    }else if($property->PropertyType == "Residential Lease"){
                         $PropertyType = "For Rent";
                     }
                     $replacedAddress = urlencode(str_replace(" ", "-", $address) . "__".$property->ListingKey);
                     $propertyCardLink = "https://teamrealtor.org/property/$replacedAddress";
+                    
+                    // set Title
+                    $title = 'Newly Listed on '.date('M d', strtotime($originalEntryTimestamp));
+                    $changedPrice = '$'.shortNumber($originalListPrice - $ListPrice);
+
                     $replacements = [
-                        '{{DATE}}' => date('M d', strtotime($originalEntryTimestamp)),
+                        '{{TITLE}}' => $title,
+                        '{{ORIGIN_PRICE}}' => ($originalListPrice == $ListPrice) ? '' : number_format($originalListPrice),
+                        '{{CHANGED_PRICE}}' => ($originalListPrice == $ListPrice) ? '' : $changedPrice,
                         '{{imageUrl}}' => $photo,
                         '{{imageUrl1}}' => $photo1,
                         '{{imageUrl2}}' => $photo2,
@@ -170,25 +202,40 @@
                     $propertyCardHtml = str_replace(array_keys($replacements), array_values($replacements), $propCardTemplate);
                     // Append the property card HTML to the collection
                     $propertyCardsHtml .= $propertyCardHtml;
+
                     $listingCount = $listingCount + 1;
+                    // print_r($property);
                 }
                 // Check if there are property cards to display
+
+                
                 if (!empty($propertyCardsHtml)) {
                     // Prepare data for the full template
+                    $mSubject = 'A New Listing to '.$listingCount.' Properties in Your Saved Search for';
                     $fullTemplateReplacements = [
                         '{{searchedIn}}' => $result['searchParams']['address'],
-                        '{{count}}'      => $listingCount,
+                        '{{SUBJECT}}'      => $mSubject,
                         '{{propertyCards}}' => $propertyCardsHtml,
                         '{{SEEALLLINK}}' => $result['search_data'],
                     ];
     
                     // Replace placeholders in the full email template
                     $fullTemplate = str_replace(array_keys($fullTemplateReplacements), array_values($fullTemplateReplacements), $fullEmail);
-                    $email = $result['user_data']['email'];
                     
-    
-                    sendDailyAlert(array('w.jie@ultramls.com', 'mark@ultramls.com'), 'A New Listing for '.$result['searchParams']['address'], $fullTemplate);
+                    
+                    $statusR = 'All';
+                    if ($result['searchParams']['listingStatus'] == 'Residential')
+                    {
+                        $statusR = 'For Sale';
+                    } else if ($result['searchParams']['listingStatus'] == 'Residential Lease') {
+                        $statusR = 'For Rent';
+                    }
+
+                    sendDailyAlert($email, 'A New Listing for '.$result['searchParams']['address'].' ('.$statusR.')', $fullTemplate);
+                    
                 }
+
+                
             }
             // Close cURL
             curl_close($ch);
@@ -210,6 +257,15 @@
             false;
         }
     }
+
+    function shortNumber($num) 
+    {
+        $units = ['', 'K', 'M', 'B', 'T'];
+        for ($i = 0; $num >= 1000; $i++) {
+            $num /= 1000;
+        }
+        return round($num, 1) . $units[$i];
+    }
     
     function sendDailyAlert($toEmail, $subject, $html) {
         $mg = Mailgun::create('key-fc10e270908d140be45ea9e56cb44f0d');
@@ -218,8 +274,8 @@
         // $mg->messages()->send($domain, $params);
     
     
-        date_default_timezone_set('US/Eastern');
-        $currenttime = date('h:i:s');
+        // date_default_timezone_set('US/Eastern');
+        // $currenttime = date('h:i:s');
     
         $params = [
             'from'    => 'TeamRealtor <postmaster@shop.mlsassistant.com>',
@@ -228,7 +284,8 @@
             'html'    => $html,
         ];
         if ($mg->messages()->send('shop.mlsassistant.com', $params)) {
-            echo 'SMTP Email has been sent';
+            echo 'Sent to '.$toEmail;
+            echo "\xA";
             // exit(0);
         } else 
             echo 'An error has occurred';
