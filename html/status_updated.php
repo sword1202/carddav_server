@@ -55,7 +55,7 @@
             
             $data = $retriveddata;
             // Fetch additional user data from users collection based on uid
-            $uid = $retriveddata['uid'];
+            $uid = $retriveddata['userId'];
             $userDoc = $firestore->collection('users')->document($uid)->snapshot();
             $userData = $userDoc->data(); // Retrieve user data
             

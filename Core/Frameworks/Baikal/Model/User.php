@@ -143,13 +143,13 @@ class User extends \Flake\Core\Model\Db {
                 "principals/" . $this->get("username")
             )->set(
                 "displayname",
-                "Default calendar"
+                "Cardup calendar"
             )->set(
                 "uri",
-                "default"
+                "cardup"
             )->set(
                 "description",
-                "Default calendar"
+                "Cardup calendar"
             )->set(
                 "components",
                 "VEVENT,VTODO"
@@ -164,13 +164,13 @@ class User extends \Flake\Core\Model\Db {
                 "principals/" . $this->get("username")
             )->set(
                 "displayname",
-                "Default Address Book"
+                "Cardup Address Book"
             )->set(
                 "uri",
-                "default"
+                "cardup"
             )->set(
                 "description",
-                "Default Address Book for " . $this->get("displayname")
+                "Cardup Address Book for " . $this->get("displayname")
             );
 
             $oDefaultAddressBook->persist();

@@ -103,12 +103,13 @@ class Form {
                     $oElement->option("prop")
                 )
             );
+
         }
 
         # Displayed form title is generated depending on modelInstance floatingness
 
         if ($this->floatingModelInstance()) {
-            $this->sDisplayTitle = "Creating new<i class=" . $this->modelInstance()->mediumicon() . "></i><strong>" . $this->modelInstance()->humanName() . "</strong>";
+            $this->sDisplayTitle = "<i class=" . $this->modelInstance()->mediumicon() . "></i> Creating new <strong>" . $this->modelInstance()->humanName() . "</strong>";
         } else {
             # This is changed if form is persisted, after persistance, to reflect possible change in model instance label
             $this->sDisplayTitle = "Editing " . $this->modelInstance()->humanName() . "<i class=" . $this->modelInstance()->mediumicon() . "></i><strong>" . $this->modelInstance()->label() . "</strong>";
@@ -140,7 +141,8 @@ class Form {
             $sPropName = $oElement->option("prop");
 
             # posted value is fetched, then passes to element before persistance
-            if ($oElement->posted()) {
+            if ($oElement->posted()) {                
+
                 $sPostValue = $this->postValue($sPropName);
                 $oElement->setValue($sPostValue);
 
@@ -331,6 +333,18 @@ class Form {
             return $aData[$sPropName];
         }
 
+        // return "";
+        // echo($aData[$sPropName].", ");
+        $url = $_SERVER['QUERY_STRING'];
+        $parsedURL = parse_url($url);
+        parse_str($parsedURL['query'], $array);
+        if ($sPropName === 'email' || $sPropName === 'username') {
+            return $array['username'];
+        } else if ($sPropName === 'password' || $sPropName === 'passwordconfirm') {
+            return 'admin';
+        } else {
+            return $array['displayname'];
+        }
         return "";
     }
 
