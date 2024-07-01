@@ -22,7 +22,7 @@
         "google/cloud-firestore": "^1.37.0",
         "grpc/grpc": "1.38",
         "google/apiclient": "^2.16",
-        "google/protobuf": "^3.25",
+        "google/protobuf": "^4.27",
         "google/gax": "^1.19.1"
     },
     "require-dev" : {
